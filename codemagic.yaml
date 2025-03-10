@@ -10,18 +10,19 @@
     scripts:
       - name: Install Unity
         script: |
-          echo "Installing Unity Hub and Unity Editor $UNITY_VERSION"
-          
-          # Установка Unity Hub
-          wget -q https://public-cdn.cloud.unity3d.com/hub/prod/UnityHub.AppImage -O UnityHub.AppImage
-          chmod +x UnityHub.AppImage
-          ./UnityHub.AppImage --appimage-extract
-          sudo mv squashfs-root /opt/unity-hub
-          sudo ln -s /opt/unity-hub/AppRun /usr/bin/unity-hub
+          echo "Installing Unity Editor $UNITY_VERSION"
 
-          # Установка Unity Editor через Unity Hub
-          unity-hub -- --headless install --version $UNITY_VERSION --changeset $(curl -s https://unity.com/releases/editor/whats-new/$UNITY_VERSION | grep -oP '(?<=<p>Changeset: )[^<]+')
-          
+          # Установка зависимостей
+          sudo apt-get update
+          sudo apt-get install -y libgconf-2-4 libxi6 libxtst6 libxrandr2 libgtk2.0-0 libxss1 libasound2
+
+          # Скачивание и установка Unity Editor
+          UNITY_DOWNLOAD_URL="https://download.unity3d.com/download_unity/$(curl -s https://unity.com/releases/editor/whats-new/$UNITY_VERSION | grep -oP '(?<=<p>Changeset: )[^<]+')/Linux/Unity.tar.gz"
+          wget -q "$UNITY_DOWNLOAD_URL" -O Unity.tar.gz
+          sudo mkdir -p /opt/Unity
+          sudo tar -xzf Unity.tar.gz -C /opt/Unity
+          rm Unity.tar.gz
+
           # Проверка установки
           /opt/Unity/Editor/Unity -version
       - name: Set up Android SDK
