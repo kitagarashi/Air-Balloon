@@ -12,11 +12,13 @@
         KEYSTORE_PASSWORD: "secure_password"  # Используйте Codemagic Secrets
         KEY_PASSWORD: "secure_password"
       android_signing:
-        - name: "play_store"  # Обязательное имя конфигурации
+        - name: "play_store"
           type: keystore
-          filePath: $KEYSTORE_PATH
+          keystore: $KEYSTORE_PATH  # Обязательное поле
+          store_password: $KEYSTORE_PASSWORD
+          key_alias: $KEY_ALIAS
+          key_password: $KEY_PASSWORD
           group: default
-          source: file
     scripts:
       - name: Install Unity
         script: |
