@@ -5,26 +5,29 @@
     max_build_duration: 120
     environment:
       vars:
-        UNITY_VERSION: 2022.3.0f1  # Используйте нужную версию Unity
+        UNITY_VERSION: 2022.3.0f1
         PACKAGE_NAME: "com.kljdflakj.AirBalloon"
-        KEYSTORE_PATH: "user.keystore"
+        KEYSTORE_PATH: "android.keystore"
         KEY_ALIAS: "airballoon_key"
-        KEYSTORE_PASSWORD: "secure_password"  # Рекомендуется использовать Codemagic Secrets для паролей
+        KEYSTORE_PASSWORD: "secure_password"  # Используйте Codemagic Secrets
         KEY_PASSWORD: "secure_password"
       android_signing:
-        - keystore: $KEYSTORE_PATH
-          store_password: $KEYSTORE_PASSWORD
-          key_alias: $KEY_ALIAS
-          key_password: $KEY_PASSWORD
+        - name: "play_store"  # Обязательное имя конфигурации
+          type: keystore
+          filePath: $KEYSTORE_PATH
+          group: default
+          source: file
     scripts:
       - name: Install Unity
         script: |
-          # Установка Unity через Unity Hub
           unityhub install --version $UNITY_VERSION --child-modules android
       - name: Generate Keystore
         script: |
           if [ ! -f "$KEYSTORE_PATH" ]; then
-            keytool -genkey -v -keystore $KEYSTORE_PATH -alias $KEY_ALIAS -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=AirBalloon, OU=Dev, O=Kljdflakj, L=City, S=State, C=US"
+            keytool -genkey -v -keystore $KEYSTORE_PATH -alias $KEY_ALIAS \
+              -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=AirBalloon, OU=Dev, O=Kljdflakj, L=City, S=State, C=US"
           fi
       - name: Configure and Build
         script: |
