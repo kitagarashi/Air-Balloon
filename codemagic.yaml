@@ -1,0 +1,43 @@
+﻿workflows:
+  unity-build:
+    name: Unity Build Workflow
+    environment:
+      groups:
+        - unity_credentials 
+      vars:
+        UNITY_VERSION: 2020.3.33f1
+        BUILD_TARGET: Android 
+    scripts:
+      - name: Install Unity
+        script: |
+          echo "Installing Unity $UNITY_VERSION"
+          curl -o unity-editor.deb "https://beta.unity3d.com/download/$(curl -s https://beta.unity3d.com/latest/linux | grep -oP '(?<=href=")[^"]+')"
+          sudo dpkg -i unity-editor.deb
+          sudo apt-get install -f
+      - name: Set up Android SDK
+        script: |
+          echo "Setting up Android SDK"
+          sudo apt-get install -y --no-install-recommends openjdk-8-jdk
+          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+          export PATH=$JAVA_HOME/bin:$PATH
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-29" "build-tools;29.0.3"
+      - name: Build Unity Project
+        script: |
+          echo "Building Unity project for $BUILD_TARGET"
+          /opt/Unity/Editor/Unity \
+            -batchmode \
+            -nographics \
+            -silent-crashes \
+            -logFile /tmp/unity_build.log \
+            -projectPath "$CM_BUILD_DIR" \
+            -buildTarget $BUILD_TARGET \
+            -executeMethod BuildScript.PerformBuild \
+            -quit
+          cat /tmp/unity_build.log
+    artifacts:
+      - build/**/*.apk 
+    publishing:
+      email:
+        recipients:
+          - ilya.smolenskiy.00@gmail.com
