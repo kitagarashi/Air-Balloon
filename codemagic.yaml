@@ -1,46 +1,26 @@
 ﻿workflows:
-  unity-android-build:
-    name: Unity Android Build
-    instance_type: linux_x2
-    max_build_duration: 120
-    environment:
-      vars:
-        UNITY_VERSION: 2022.3.0f1
-        PACKAGE_NAME: "com.kljdflakj.AirBalloon"
-        KEYSTORE_PATH: "android.keystore"
-        KEY_ALIAS: "airballoon_key"
-        KEYSTORE_PASSWORD: "secure_password"  # Используйте Codemagic Secrets
-        KEY_PASSWORD: "secure_password"
-      android_signing:
-        - name: "play_store"
-          type: keystore
-          keystore: $KEYSTORE_PATH  # Обязательное поле
-          store_password: $KEYSTORE_PASSWORD
-          key_alias: $KEY_ALIAS
-          key_password: $KEY_PASSWORD
-          group: default
-    scripts:
-      - name: Install Unity
-        script: |
-          unityhub install --version $UNITY_VERSION --child-modules android
-      - name: Generate Keystore
-        script: |
-          if [ ! -f "$KEYSTORE_PATH" ]; then
-            keytool -genkey -v -keystore $KEYSTORE_PATH -alias $KEY_ALIAS \
-              -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=AirBalloon, OU=Dev, O=Kljdflakj, L=City, S=State, C=US"
-          fi
-      - name: Configure and Build
-        script: |
-          unity-editor \
-            -batchmode \
-            -nographics \
-            -silent-crashes \
-            -logFile /dev/stdout \
-            -projectPath . \
-            -executeMethod BuildScript.PerformBuild \
-            -quit
-    artifacts:
-      - build/*.apk
-      - $KEYSTORE_PATH
+  unity-mac-workflow:
+      # Building Unity on macOS requires special instance type which is available upon request
+      name: Unity Mac Workflow
+      environment:
+        groups:
+          # Add the group environment variables in Codemagic UI (either in Application/Team variables) - https://docs.codemagic.io/variables/environment-variable-groups/
+          - unity # <-- (Includes UNITY_SERIAL, UNITY_USERNAME, UNITY_PASSWORD)
+        vars:
+          UNITY_BIN: $UNITY_HOME/Contents/MacOS/Unity
+          TEST_REPORT_PATH: tests.xml
+      scripts:
+        - name: Activate License
+          script: $UNITY_BIN -batchmode -quit -logFile -serial ${UNITY_SERIAL?} -username ${UNITY_USERNAME?} -password ${UNITY_PASSWORD?}
+        - name: Run Unit Tests
+          script: $UNITY_BIN -batchmode -executeMethod Runner.RunUnitTests -logFile -nographics -projectPath . -testsOutput ${TEST_REPORT_PATH}
+          test_report: ${TEST_REPORT_PATH}
+        - name: Build
+          script: $UNITY_BIN -batchmode -quit -logFile -projectPath . -executeMethod BuildScript.BuildMac -nographics
+      artifacts:
+        - "mac/UnitTestingPong.app"
+        - ${TEST_REPORT_PATH}
+      publishing:
+        scripts:
+          - name: Deactivate License
+            script: $UNITY_BIN -batchmode -quit -returnlicense -nographics
