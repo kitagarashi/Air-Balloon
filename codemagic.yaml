@@ -4,8 +4,6 @@
     environment:
         android_signing:
             - user
-        groups:
-            - unity_credentials # Группа с переменными для Unity (UNITY_EMAIL, UNITY_PASSWORD, UNITY_SERIAL)
         vars:
             UNITY_VERSION: 2022.3.6f1 # Версия Unity
             BUILD_TARGET: Android # Цель сборки
@@ -53,14 +51,14 @@
         script: |
           echo "Generating keystore"
           keytool -genkey -v \
-            -keystore unity_codemagic.keystore \
-            -alias codemagic \
+            -keystore user.keystore \
+            -alias user \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
             -dname "CN=, OU=, O=, L=, S=, C=" \
-            -storepass "password" \
-            -keypass "password"
+            -storepass "173014" \
+            -keypass "173014"
 
       # Настройка Unity для сборки
       - name: Configure Unity Project
