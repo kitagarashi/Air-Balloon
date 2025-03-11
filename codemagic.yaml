@@ -90,11 +90,9 @@
         - user
       groups:
         - unity_credentials
-        - google_play
       vars:
         BUILD_SCRIPT: BuildAndroid
         PACKAGE_NAME: "com.idijfskl.AirBalloon"
-        GOOGLE_PLAY_TRACK: alpha
     scripts:
       - name: Activate Unity License
         script: |
@@ -102,11 +100,6 @@
             -serial ${UNITY_SERIAL?} \
             -username ${UNITY_EMAIL?} \
             -password ${UNITY_PASSWORD?}
-      - name: Set build number
-        script: |
-          export NEW_BUILD_NUMBER=$(($(google-play get-latest-build-number \
-            --package-name "$PACKAGE_NAME" \
-            --tracks="$GOOGLE_PLAY_TRACK") + 1))
       - name: Build the project
         script: |
           $UNITY_HOME/Contents/MacOS/Unity -batchmode \
@@ -132,12 +125,6 @@
         notify:
           success: true
           failure: false
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: GOOGLE_PLAY_TRACK
-        submit_as_draft: true
-
-
 
   unity-windows-workflow:
     name: Unity Windows Workflow
