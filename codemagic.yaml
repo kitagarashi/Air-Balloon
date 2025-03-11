@@ -11,31 +11,6 @@
             MIN_SDK_VERSION: 23 # Минимальная версия API
             TARGET_SDK_VERSION: 34 # Целевая версия API
     scripts:
-      # Установка Unity
-      - name: Install Unity
-        script: |
-          echo "Installing Unity Editor $UNITY_VERSION"
-
-          # Установка зависимостей
-          sudo apt-get update
-          sudo apt-get install -y libgconf-2-4 libxi6 libxtst6 libxrandr2 libgtk2.0-0 libxss1 libasound2
-
-          # Скачивание и установка Unity Editor
-          UNITY_DOWNLOAD_URL="https://download.unity3d.com/download_unity/$(curl -s https://unity.com/releases/editor/whats-new/$UNITY_VERSION | grep -oP '(?<=<p>Changeset: )[^<]+')/Linux/Unity.tar.gz"
-          wget -q "$UNITY_DOWNLOAD_URL" -O Unity.tar.gz
-          sudo mkdir -p /opt/Unity
-          sudo tar -xzf Unity.tar.gz -C /opt/Unity
-          rm Unity.tar.gz
-
-          # Проверка установки
-          if [ -f "/opt/Unity/Editor/Unity" ]; then
-            echo "Unity installed successfully"
-            /opt/Unity/Editor/Unity -version
-          else
-            echo "Unity installation failed"
-            exit 1
-          fi
-
       # Настройка Android SDK
       - name: Set up Android SDK
         script: |
