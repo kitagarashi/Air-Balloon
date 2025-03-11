@@ -1,71 +1,27 @@
 ﻿workflows:
-  unity-android-build:
-    name: Unity Android Build
+  unity-android-workflow:
+    name: Unity Android Workflow
+    max_build_duration: 120
     environment:
-        android_signing:
-            - user
-        vars:
-            UNITY_VERSION: 2022.3.6f1 # Версия Unity
-            BUILD_TARGET: Android # Цель сборки
-            PACKAGE_NAME: "com.kljdflakj.AirBalloon" # Имя пакета
-            MIN_SDK_VERSION: 23 # Минимальная версия API
-            TARGET_SDK_VERSION: 34 # Целевая версия API
+      android_signing:
+        - user
+    triggering:
+      events:
+        - push
+        - tag
+        - pull_request
     scripts:
-      # Настройка Android SDK
-      - name: Set up Android SDK
-        script: |
-          echo "Setting up Android SDK"
-          sudo apt-get install -y --no-install-recommends openjdk-8-jdk
-          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-          export PATH=$JAVA_HOME/bin:$PATH
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-$TARGET_SDK_VERSION" "build-tools;34.0.0"
+      - name: variable check
+        script: echo $UNITY_HOME
+      
+      - name: Build the project
+        script: | 
+          Unity -batchmode \
+            -quit \
+            -logFile \
+            -projectPath . \
+            -executeMethod BuildScript.BuildAndroid \
+            -nographics
 
-      # Создание keystore
-      - name: Generate Keystore
-        script: |
-          echo "Generating keystore"
-          keytool -genkey -v \
-            -keystore user.keystore \
-            -alias user \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=, OU=, O=, L=, S=, C=" \
-            -storepass "173014" \
-            -keypass "173014"
-
-      # Настройка Unity для сборки
-      - name: Configure Unity Project
-        script: |
-          echo "Configuring Unity project"
-          /opt/Unity/Editor/Unity \
-            -batchmode \
-            -nographics \
-            -silent-crashes \
-            -logFile /tmp/unity_configure.log \
-            -projectPath "$CM_BUILD_DIR" \
-            -executeMethod BuildScript.ConfigureProject \
-            -quit
-          cat /tmp/unity_configure.log
-
-      # Сборка Unity-проекта
-      - name: Build Unity Project
-        script: |
-          echo "Building Unity project for $BUILD_TARGET"
-          /opt/Unity/Editor/Unity \
-            -batchmode \
-            -nographics \
-            -silent-crashes \
-            -logFile /tmp/unity_build.log \
-            -projectPath "$CM_BUILD_DIR" \
-            -buildTarget $BUILD_TARGET \
-            -executeMethod BuildScript.PerformBuild \
-            -quit
-          cat /tmp/unity_build.log
     artifacts:
-      - build/**/*.apk # Путь к собранному APK-файлу
-    publishing:
-      email:
-        recipients:
-          - your-email@example.com
+      - android/*.aab
