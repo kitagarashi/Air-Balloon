@@ -94,12 +94,12 @@
         BUILD_SCRIPT: BuildAndroid
         PACKAGE_NAME: "com.idijfskl.AirBalloon"
     scripts:
-      - name: Activate Unity License
-        script: |
-          $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile \
-            -serial ${UNITY_SERIAL?} \
-            -username ${UNITY_EMAIL?} \
-            -password ${UNITY_PASSWORD?}
+      # - name: Activate Unity License
+      #   script: |
+      #     $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile \
+      #       -serial ${UNITY_SERIAL?} \
+      #       -username ${UNITY_EMAIL?} \
+      #       -password ${UNITY_PASSWORD?}
       - name: Build the project
         script: |
           $UNITY_HOME/Contents/MacOS/Unity -batchmode \
@@ -112,16 +112,15 @@
       - android/*.aab
     publishing:
       scripts:
-        - name: Deactivate Unity License
-          script: | 
-            /Applications/Unity\ Hub.app/Contents/Frameworks/UnityLicensingClient_V1.app/Contents/MacOS/Unity.Licensing.Client \
-            --return-ulf \
-            --username ${UNITY_EMAIL?} \
-            --password ${UNITY_PASSWORD?}
+        # - name: Deactivate Unity License
+        #   script: | 
+        #     /Applications/Unity\ Hub.app/Contents/Frameworks/UnityLicensingClient_V1.app/Contents/MacOS/Unity.Licensing.Client \
+        #     --return-ulf \
+        #     --username ${UNITY_EMAIL?} \
+        #     --password ${UNITY_PASSWORD?}
       email:
         recipients:
-          - user_1@example.com
-          - user_2@example.com
+          - ilya.smolenskiy.00@gmail.com
         notify:
           success: true
           failure: false
