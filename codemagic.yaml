@@ -111,7 +111,7 @@
     artifacts:
       - android/*.aab
     publishing:
-      scripts:
+      # scripts:
         # - name: Deactivate Unity License
         #   script: | 
         #     /Applications/Unity\ Hub.app/Contents/Frameworks/UnityLicensingClient_V1.app/Contents/MacOS/Unity.Licensing.Client \
